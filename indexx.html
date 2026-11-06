@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دیاری هەستیار - K-Drama Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+
+        :root {
+            --neon-pink: #ff2a85;
+            --neon-blue: #00e5ff;
+            --neon-purple: #b537f2;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.9)), 
+                        url('https://images.unsplash.com/photo-1580214304899-738965839b2f?q=80&w=1920&auto=format') center/cover fixed;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ستایلی شووشەیی بۆ پەنجەرەکان */
+        .glass-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s;
+            display: none; /* هەموویان شاردراوەن لە سەرەتادا */
+        }
+
+        .active-stage {
+            display: block;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تێکستی گڵۆواوی */
+        .neon-text {
+            color: #fff;
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 
+                         0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink), 0 0 80px var(--neon-pink);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .neon-blue {
+            text-shadow: 0 0 5px #fff, 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        p { font-size: 1.2em; line-height: 1.6; }
+
+        /* دوگمەی نێۆن */
+        .btn {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--neon-blue);
+            padding: 12px 20px;
+            margin: 10px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 90%;
+            font-family: inherit;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3) inset, 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+            transform: scale(1.05);
+        }
+
+        .btn-pink { border-color: var(--neon-pink); box-shadow: 0 0 10px rgba(255, 42, 133, 0.3) inset, 0 0 10px rgba(255, 42, 133, 0.3); }
+        .btn-pink:hover { background: var(--neon-pink); color: white; box-shadow: 0 0 20px var(--neon-pink); }
+
+        .error { color: #ff2a2a; margin-top: 15px; display: none; font-weight: bold; text-shadow: 0 0 10px red; }
+        .stage-title { color: #b537f2; font-size: 1em; margin-bottom: -10px; letter-spacing: 2px; }
+
+        /* یارییەکان */
+        #game1-area { height: 150px; position: relative; margin: 20px 0; border: 1px dashed rgba(255,255,255,0.2); }
+        .floating-heart { font-size: 2em; position: absolute; cursor: pointer; animation: float 3s infinite alternate; }
+        @keyframes float { from { transform: translateY(0); } to { transform: translateY(100px); } }
+        
+        #big-heart { font-size: 5em; cursor: pointer; transition: 0.1s; }
+        #big-heart:active { transform: scale(0.9); }
+        
+        #runaway-btn { position: relative; width: 150px; }
+        
+        .item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .grid-item { font-size: 3em; cursor: pointer; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 15px; transition: 0.3s; }
+        .grid-item:hover { background: var(--neon-purple); }
+
+        .pass-input { background: transparent; border: 2px solid var(--neon-pink); color: white; font-size: 2em; text-align: center; padding: 10px; width: 100px; border-radius: 15px; outline: none; margin: 20px 0; text-shadow: 0 0 10px var(--neon-pink); }
+
+        .confetti { position: absolute; width: 10px; height: 10px; z-index: 100; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+        /* وێنەی کۆتایی */
+        .final-img { width: 100%; border-radius: 15px; margin-top: 15px; box-shadow: 0 0 20px var(--neon-pink); }
+    </style>
+</head>
+<body>
+
+    <!-- سەرەتا -->
+    <div id="intro" class="glass-box active-stage">
+        <h1 class="neon-text">سڵاو هەستیار 🎬</h1>
+        <p>بەخێربێیت بۆ جیهانی کەی-دراما! ئەمشەو دیارییەکەی تۆ لەناو ئەم سیستەمەدایە.</p>
+        <p class="neon-blue">بەڵام... دەبێت ١٠ قۆناغ ببڕیت بۆ ئەوەی بیسەلمێنیت کە سەرسەختترین فانی کۆریایت!</p>
+        <button class="btn btn-pink" onclick="nextStage('q1')">با دەست پێبکەین 🚀</button>
+    </div>
+
+    <!-- 1. پرسیار -->
+    <div id="q1" class="glass-box">
+        <div class="stage-title">قۆناغی 1 / 10</div>
+        <h2 class="neon-blue">پایتەختی کۆریای باشوور کوێیە؟</h2>
+        <button class="btn" onclick="wrongAnswer('q1')">بوزان</button>
+        <button class="btn btn-pink" onclick="nextStage('g1')">سێئۆل (Seoul)</button>
+        <button class="btn" onclick="wrongAnswer('q1')">جیجۆ</button>
+        <div class="error" id="err-q1">هەڵەیە! ئابڕووی فانەکانت برد 😂</div>
+    </div>
+
+    <!-- 2. یاری: گرتنی دڵ -->
+    <div id="g1" class="glass-box">
+        <div class="stage-title">قۆناغی 2 / 10</div>
+        <h2 class="neon-text">3 دڵی کۆری (🫰) بگرە!</h2>
+        <p>خێرا کلیک لە دڵەکان بکە کە دەجوڵێن</p>
+        <div id="game1-area"></div>
+        <h3 class="neon-blue" id="g1-score">گیراوە: 0 / 3</h3>
+    </div>
+
+    <!-- 3. پرسیار -->
+    <div id="q2" class="glass-box">
+        <div class="stage-title">قۆناغی 3 / 10</div>
+        <h2 class="neon-blue">وشەی "ئۆپا - Oppa" کێ بەکاریدەهێنێت؟</h2>
+        <button class="btn" onclick="wrongAnswer('q2')">کوڕ بۆ هاوڕێی کوڕ</button>
+        <button class="btn btn-pink" onclick="nextStage('g2')">کچ بۆ کوڕێکی لەخۆی گەورەتر</button>
+        <button class="btn" onclick="wrongAnswer('q2')">مامۆستا بۆ قوتابی</button>
+        <div class="error" id="err-q2">هەڵەیە! دیارە دراماکان بە دۆبلاژ سەیر دەکەیت😂 😜</div>
+    </div>
+
+    <!-- 4. یاری: پڕکردنەوەی وزە -->
+    <div id="g2" class="glass-box">
+        <div class="stage-title">قۆناغی 4 / 10</div>
+        <h2 class="neon-text">پڕکردنەوەی وزەی دراما</h2>
+        <p>10 جار کرتە لەم دڵە بکە بۆ ئەوەی وزەکەت ببێتە 100%</p>
+        <div id="big-heart" onclick="clickHeart()">❤️</div>
+        <h2 class="neon-blue" id="g2-score">0%</h2>
+    </div>
+
+    <!-- 5. پرسیار -->
+    <div id="q3" class="glass-box">
+        <div class="stage-title">قۆناغی 5 / 10</div>
+        <h2 class="neon-blue">خواردنە تیژە بەناوبانگەکەی کۆریا چییە؟</h2>
+        <button class="btn btn-pink" onclick="nextStage('g3')">کیمچی (Kimchi)</button>
+        <button class="btn" onclick="wrongAnswer('q3')">سۆشی</button>
+        <button class="btn" onclick="wrongAnswer('q3')">نۆدڵسی ئاسایی</button>
+        <div class="error" id="err-q3">هەڵەیە! برسی نیت؟</div>
+    </div>
+
+    <!-- 6. یاری: دوگمەی ڕاکردوو -->
+    <div id="g3" class="glass-box">
+        <div class="stage-title">قۆناغی 6 / 10</div>
+        <h2 class="neon-text">دوگمەکە بگرە!</h2>
+        <p>هەوڵبدە کرتە لەم دوگمەیە بکە ئەگەر دەتوانیت!</p>
+        <button id="runaway-btn" class="btn btn-pink" onmouseover="moveBtn()" onclick="nextStage('q4')">بمگرە! 🏃‍♂️</button>
+    </div>
+
+    <!-- 7. پرسیار -->
+    <div id="q4" class="glass-box">
+        <div class="stage-title">قۆناغی 7 / 10</div>
+        <h2 class="neon-blue">جلی کلتوری و کۆنی کۆری پێی دەوترێت؟</h2>
+        <button class="btn" onclick="wrongAnswer('q4')">کیمۆنۆ</button>
+        <button class="btn" onclick="wrongAnswer('q4')">سارۆنگ</button>
+        <button class="btn btn-pink" onclick="nextStage('g4')">هانبۆک (Hanbok)</button>
+        <div class="error" id="err-q4">هەڵەیە! بڕۆوە سەیری درامای مێژوویی بکە.</div>
+    </div>
+
+    <!-- 8. یاری: جیاوازی دۆزینەوە -->
+    <div id="g4" class="glass-box">
+        <div class="stage-title">قۆناغی 8 / 10</div>
+        <h2 class="neon-text">کامەیان جیاوازە؟</h2>
+        <p>سێیان خواردنەوەی سۆجۆن، یەکێکیان شیری مۆزە (خواردنەوەی دڵخوازی کەی-دراما)، بیدۆزەرەوە!</p>
+        <div class="item-grid">
+            <div class="grid-item" onclick="wrongAnswer('g4')">🍶</div>
+            <div class="grid-item" onclick="nextStage('q5')">🧃</div>
+            <div class="grid-item" onclick="wrongAnswer('g4')">🍶</div>
+            <div class="grid-item" onclick="wrongAnswer('g4')">🍶</div>
+        </div>
+        <div class="error" id="err-g4">هەڵەیە! ئەوە سۆجۆ بوو!</div>
+    </div>
+
+    <!-- 9. پرسیار -->
+    <div id="q5" class="glass-box">
+        <div class="stage-title">قۆناغی 9 / 10</div>
+        <h2 class="neon-blue">بە کۆری بە "خۆشمدەوێیت" دەڵێن چی؟</h2>
+        <button class="btn" onclick="wrongAnswer('q5')">کامسامنیدا</button>
+        <button class="btn btn-pink" onclick="nextStage('g5')">سارانگهێ (Saranghae)</button>
+        <button class="btn" onclick="wrongAnswer('q5')">ئانیۆنگ</button>
+        <div class="error" id="err-q5">هەڵەیە! دڵی منیشت شکاند 💔</div>
+    </div>
+
+    <!-- 10. یاری کۆتایی: پاسۆرد -->
+    <div id="g5" class="glass-box">
+        <div class="stage-title">قۆناغی کۆتایی 10 / 10</div>
+        <h2 class="neon-text">قوفڵی کۆتایی 🔒</h2>
+        <p>زۆر باشە... گەیشتیتە کۆتایی! بۆ کردنەوەی دیارییەکە، تەمەنی نوێت (بە ژمارە) لێرە بنووسە:</p>
+        <input type="number" id="age-input" class="pass-input" placeholder="؟؟" onkeyup="checkPassword()">
+        <div class="error" id="err-g5">پاسۆردەکە هەڵەیە! چەند ساڵ دەبیت؟</div>
+    </div>
+
+    <!-- نامەی کۆتایی و دیارییەکە -->
+    <div id="final" class="glass-box">
+        <h1 class="neon-text" style="font-size: 3.5em; margin-bottom: 0;">17</h1>
+        <h2 class="neon-blue">생일 축하해 (Saengil ChukhaHae) 🎉</h2>
+        <p style="font-size: 1.4em; font-weight: bold;">تەمەنی ١٧ ساڵیت پیرۆز بێت هەستیار گیان! 🎂</p>
+        <p>بەهیوام ئەمساڵت پڕ بێت لە سەرکەوتن و جوانترین ساتەکان، وەک ئەو دراما کۆرییانەی حەزت لێیەتی. هەمیشە دڵخۆش و تەندروست بیت ! 🫰🇰🇷</p>
+        <img src="https://images.unsplash.com/photo-1517154421773-0529f29ea451?q=80&w=800&auto=format" class="final-img" alt="Korean Vibe">
+    </div>
+
+    <script>
+        // گۆڕینی قۆناغەکان
+        function nextStage(nextId) {
+            document.querySelectorAll('.glass-box').forEach(box => {
+                box.classList.remove('active-stage');
+            });
+            document.getElementById(nextId).classList.add('active-stage');
+
+            // ئەگەر قۆناغی 2 (گرتنی دڵ) بوو، دڵەکان دروست بکە
+            if(nextId === 'g1') setupGame1();
+            // ئەگەر قۆناغی کۆتایی بوو، کاغەز بپڕژێنە
+            if(nextId === 'final') createConfetti();
+        }
+
+        // پیشاندانی هەڵە
+        function wrongAnswer(stageId) {
+            let err = document.getElementById('err-' + stageId);
+            err.style.display = 'block';
+            setTimeout(() => { err.style.display = 'none'; }, 2500);
+        }
+
+        // کۆدی یاری 1 (گرتنی دڵەکان)
+        let heartsCaught = 0;
+        function setupGame1() {
+            heartsCaught = 0;
+            document.getElementById('game1-area').innerHTML = '';
+            document.getElementById('g1-score').innerText = 'گیراوە: 0 / 3';
+            for(let i=0; i<3; i++) {
+                let heart = document.createElement('div');
+                heart.innerHTML = '🫰';
+                heart.className = 'floating-heart';
+                heart.style.left = Math.random() * 80 + '%';
+                heart.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                heart.onclick = function() {
+                    this.style.display = 'none';
+                    heartsCaught++;
+                    document.getElementById('g1-score').innerText = 'گیراوە: ' + heartsCaught + ' / 3';
+                    if(heartsCaught === 3) {
+                        setTimeout(() => nextStage('q2'), 500);
+                    }
+                }
+                document.getElementById('game1-area').appendChild(heart);
+            }
+        }
+
+        // کۆدی یاری 2 (پڕکردنەوەی وزە)
+        let heartClicks = 0;
+        function clickHeart() {
+            heartClicks++;
+            document.getElementById('g2-score').innerText = (heartClicks * 10) + '%';
+            document.getElementById('big-heart').style.textShadow = '0 0 ' + (heartClicks * 5) + 'px red';
+            if(heartClicks >= 10) {
+                setTimeout(() => nextStage('q3'), 500);
+            }
+        }
+
+        // کۆدی یاری 3 (دوگمەی ڕاکردوو)
+        function moveBtn() {
+            let btn = document.getElementById('runaway-btn');
+            let x = Math.random() * 200 - 100;
+            let y = Math.random() * 200 - 100;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        // کۆدی یاری کۆتایی (پاسۆردی تەمەن)
+        function checkPassword() {
+            let val = document.getElementById('age-input').value;
+            if(val === '17' || val === '١٧') {
+                nextStage('final');
+            } else if (val.length >= 2) {
+                wrongAnswer('g5');
+            }
+        }
+
+        // ئەنیمەیشنی کاغەزی ئاهەنگگێڕان (کۆتایی)
+        function createConfetti() {
+            const colors = ['#ff2a85', '#00e5ff', '#b537f2', '#fff', '#ffeb3b'];
+            for (let i = 0; i < 150; i++) {
+                let confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.top = '-10px';
+                let duration = Math.random() * 3 + 2; 
+                confetti.style.animationDuration = duration + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => { confetti.remove(); }, duration * 1000);
+            }
+        }
+    </script>
+</body>
+</html>
